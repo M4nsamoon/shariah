@@ -1,0 +1,117 @@
+# Shariah Compliance Screener - Rule of 33%
+
+## 🚀 Quick Start for GitHub Codespaces
+
+### Step 1: Install Dependencies
+```bash
+pip install yfinance pandas openpyxl
+```
+
+### Step 2: Run the Screener
+```bash
+python shariah_screener.py shariah.csv
+```
+
+That's it! The screener will process your ~1,100 tickers and generate reports.
+
+---
+
+## 📊 Output Files Generated
+
+| File | Description |
+|------|-------------|
+| `shariah_compliance_report.xlsx` | Professional Excel report with 4 sheets |
+| `shariah_compliance_results.csv` | Raw data for further analysis |
+
+### Excel Report Sheets:
+1. **Summary** - Statistics dashboard
+2. **All Results** - Complete screening data
+3. **Compliant Only** - Shariah-compliant stocks sorted by debt ratio
+4. **Non-Compliant** - Failed stocks with failure reasons
+
+---
+
+## 📋 Shariah Compliance Criteria (Rule of 33%)
+
+All three ratios must be **< 33.33%** for compliance:
+
+| # | Ratio | Formula |
+|---|-------|---------|
+| 1 | Debt Ratio | Total Debt / Market Cap |
+| 2 | Cash Ratio | (Cash + Interest-Bearing Securities) / Market Cap |
+| 3 | Receivables Ratio | Accounts Receivables / Market Cap |
+
+---
+
+## ⚙️ Customisation Options
+
+### Change Threshold
+```python
+from shariah_screener import ShariahScreener
+
+# Use stricter 30% threshold
+screener = ShariahScreener(threshold=30.0)
+results = screener.screen_from_csv('shariah.csv')
+```
+
+### Sequential Processing (slower but more stable)
+```python
+results = screener.screen_from_csv('shariah.csv', parallel=False)
+```
+
+### Filter Results
+```python
+# Get only compliant stocks
+compliant = results[results['overall_compliant'] == True]
+
+# Get non-compliant due to high debt
+high_debt = results[results['debt_ratio'] >= 33.33]
+
+# Export compliant tickers only
+compliant['ticker'].to_csv('compliant_tickers.csv', index=False)
+```
+
+---
+
+## 🌍 Supported Exchanges
+
+The screener handles tickers from:
+- **UK**: LSE (.L suffix)
+- **US**: NYSE, NASDAQ (auto-converts .O, .K suffixes)
+- **Europe**: Frankfurt (.DE), Paris (.PA), Amsterdam (.AS), Madrid (.MC), etc.
+- **Nordic**: Copenhagen (.CO), Oslo (.OL), Helsinki (.HE)
+- **Switzerland**: SIX (.SW)
+
+---
+
+## ⚠️ Notes
+
+- **UNKNOWN tickers**: Automatically skipped
+- **ISIN codes**: Automatically filtered out
+- **Rate limiting**: 5 parallel threads with retry logic
+- **Data source**: Yahoo Finance via yfinance
+
+---
+
+## 📈 Expected Runtime
+
+For ~1,100 tickers with parallel processing:
+- **Estimated time**: 15-25 minutes
+- **Depends on**: Network speed, Yahoo Finance API response
+
+---
+
+## 🔧 Troubleshooting
+
+**"No data available" for many tickers?**
+- Some European tickers may need suffix adjustments
+- Try running with `parallel=False` for problematic batches
+
+**Rate limiting errors?**
+- Reduce `MAX_WORKERS` in the script from 5 to 3
+- Add longer delays between requests
+
+---
+
+## 📄 License
+MIT - Free for personal and commercial use
